@@ -62,16 +62,16 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { uname, password, person } = req.body;
     if (person === 'admin') {
-        const a = await Admin.findOne({ aId: uname });
-        if (!a) {
+        const admin = await Admin.findOne({ aId: uname });
+        if (!admin) {
             return res.status(400).json({ err: 'invalid details of admin ' })
         }
-        if (a) {
-            const isMatch = await bcrypt.compare(password, a.aHashPassword);
+        if (admin) {
+            const isMatch = await bcrypt.compare(password, admin.aHashPassword);
             if (!isMatch)
                 return res.status(400).json({ err: "invalid details of admin " })
             else {
-                const token = await a.generateAuthToken();
+                const token = await admin.generateAuthToken();
                 // console.log('admin token :>> ', token);
                 res.cookie("adminToken", token,
                     {
@@ -86,7 +86,8 @@ router.post('/login', async (req, res) => {
                         // httpOnly: true
                     }
                 )
-                return res.json({ success: "login successful" })
+
+                return res.json({ success: "Login Successfully", ...admin._doc });
             }
         }
     } else if (person === 'police') {
