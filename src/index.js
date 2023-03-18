@@ -12,18 +12,7 @@ exp.use(cookieParser());
 require('./db/conn');
 exp.use(require('./routes/auth.js'))
 
-
-// exp.post('/post', (req, res) => {
-//     console.log('data :>> ', req.body);
-//     try {
-//         res.send("ok")
-//     } catch (err) {
-//         res.send(err)
-//     }
-// })
-
-
-
 exp.listen(7100, () => {
     console.log("running on port 7100")
-}) 
+})
+
