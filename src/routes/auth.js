@@ -73,18 +73,13 @@ router.post('/login', async (req, res) => {
             else {
                 const token = await admin.generateAuthToken();
                 // console.log('admin token :>> ', token);
-                res.cookie("adminToken", token,
-                    {
-                        expires: new Date(Date.now() + 3600 * 24 * 365),
-                        // httpOnly: true
-                    }
+                res.cookie("adminToken", token, {
+                    expires: new Date(Date.now() + 3600 * 24 * 365),
+                }
                 );
-                res.cookie('person', 'admin'
-                    ,
-                    {
-                        expires: new Date(Date.now() + 3600 * 24 * 365),
-                        // httpOnly: true
-                    }
+                res.cookie('person', 'admin', {
+                    expires: new Date(Date.now() + 3600 * 24 * 365),
+                }
                 )
 
                 return res.json({ success: "Login Successfully", ...admin._doc });
@@ -108,7 +103,7 @@ router.post('/login', async (req, res) => {
                 res.cookie('person', 'police', {
                     expires: new Date(Date.now() + 9999999999),
                 })
-                return res.json({ success: "login successful" })
+                return res.json({ ...p._doc, success: "login successful" })
             }
         }
 

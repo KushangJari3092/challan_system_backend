@@ -4,4 +4,4 @@ mongoose.connect("mongodb+srv://KushangJariwala:kushang3092@cluster0.myllqta.mon
     useNewUrlParser: true,
     useUnifiedTopology: true,
 }).then(() => { console.log("db connected") })
-    .catch((err) => { console.log('err :>> ', err); })
+    .catch((err) => { console.log('err in db :>> ', err); })
