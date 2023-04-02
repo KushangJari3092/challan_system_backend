@@ -10,6 +10,7 @@ exp.use(cookieParser());
 require('../db/conn')
 const Admin = require('../models/admin');
 const Police = require('../models/police');
+const superAdmin = require('../models/superAdmin');
 
 router.get('/', (req, res) => {
     res.send("hello home")
@@ -61,28 +62,37 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const { uname, password, person } = req.body;
+
     if (person === 'admin') {
         const admin = await Admin.findOne({ aId: uname });
-        if (!admin) {
-            return res.status(400).json({ err: 'invalid details of admin ' })
+        const superadmin = await superAdmin.findOne({ superId: uname });
+
+        if (!superadmin && !admin) {
+            return res.status(400).json({ err: 'invalid details' })
         }
-        if (admin) {
+        else if (superadmin) {
+            console.log('superadmin :>> ', superadmin);
+            if (superadmin.password != password)
+                return res.status(400).json({ err: "invalid details " })
+            else {
+                const token = await superadmin.generateAuthToken();
+                res.cookie("superAdminToken", token, { expires: new Date(Date.now() + 3600 * 24 * 365), });
+                res.cookie('person', 'superAdmin', { expires: new Date(Date.now() + 3600 * 24 * 365), })
+
+                return res.json({ success: "Login Successfully", ...superadmin._doc });
+            }
+        }
+        else if (admin) {
+            console.log('admin :>> ', admin);
             const isMatch = await bcrypt.compare(password, admin.aHashPassword);
             if (!isMatch)
                 return res.status(400).json({ err: "invalid details of admin " })
             else {
                 const token = await admin.generateAuthToken();
-                // console.log('admin token :>> ', token);
-                res.cookie("adminToken", token, {
-                    expires: new Date(Date.now() + 3600 * 24 * 365),
-                }
-                );
-                res.cookie('person', 'admin', {
-                    expires: new Date(Date.now() + 3600 * 24 * 365),
-                }
-                )
+                res.cookie("adminToken", token, { expires: new Date(Date.now() + 3600 * 24 * 365), });
+                res.cookie('person', 'admin', { expires: new Date(Date.now() + 3600 * 24 * 365), })
 
-                return res.json({ success: "Login Successfully", ...admin._doc });
+                return res.json({ ...admin._doc, success: "Login Successfully" });
             }
         }
     } else if (person === 'police') {
@@ -107,14 +117,16 @@ router.post('/login', async (req, res) => {
             }
         }
 
-    } else if (person === 'user') {
-
     }
 
 })
 
 router.get('/logout', (req, res) => {
-    if (req.cookies.person === 'admin') {
+    if (req.cookies.person === 'superAdmin') {
+        res.clearCookie('superAdminToken');
+        res.clearCookie('person')
+    }
+    else if (req.cookies.person === 'admin') {
         res.clearCookie('adminToken');
         res.clearCookie('person')
     }
@@ -131,17 +143,19 @@ router.get('/logout', (req, res) => {
 
 router.get('/getData', async (req, res) => {
     try {
-        console.log('req.cookies police:>> ', req.cookies);
-        if (req.cookies.person === 'admin') {
+        if (req.cookies.person === 'superAdmin') {
+            const token = req.cookies.superAdminToken;
+            const superadmin = await superAdmin.findOne({ "tokens.token": token })
+            res.send(superadmin);
+        }
+        else if (req.cookies.person === 'admin') {
             const token = req.cookies.adminToken;
             const admin = await Admin.findOne({ "tokens.token": token })
-            // console.log('admin :>> ', admin);
             res.send(admin);
         }
         else if (req.cookies.person === 'police') {
             const token = req.cookies.policeToken;
             const police = await Police.findOne({ "tokens.token": token })
-            // console.log('admin :>> ', admin);
             res.send(police);
         }
     } catch (err) {
