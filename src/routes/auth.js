@@ -190,6 +190,14 @@ router.get('/getChallans', async (req, res) => {
         console.log('err in get challan auth :>> ', err);
     }
 })
+router.get('/getAdmins', async (req, res) => {
+    try {
+        const admins = await Admin.find();
+        res.send(admins);
+    } catch (err) {
+        console.log('err in get challan auth :>> ', err);
+    }
+})
 
 router.post('/submitChallan', async (req, res) => {
     try {
@@ -219,6 +227,79 @@ router.post('/submitChallan', async (req, res) => {
     }
     catch (err) {
         return res.json({ err: "challan is not submitted" })
+    }
+})
+
+router.post('/checkout', async (req, res) => {
+    // console.log(req.body)
+    let error, status
+
+    try {
+        const { currAmt, totalAmt, status, chid } = req.body;
+        console.log('currAmt :>> ', currAmt);
+        console.log('totalAmt :>> ', totalAmt);
+        console.log('status :>> ', status);
+        console.log('challanId :>> ', chid);
+
+        if (chid) {
+            const challan = await Challan.updateOne({ _id: chid }, { $set: { status: "done" } })
+        }
+        else {
+
+            return res.status(400).json({ err: 'payment fail' })
+        }
+    }
+    catch ({ error }) {
+        console.log(error)
+        status = "fail";
+    }
+
+    res.json({ error, status });
+})
+
+
+router.post('/userform', async (req, res) => {
+    try {
+        const { name, email, contact, aadharNo, address, dob, licenseNo, vehicleNo } = req.body;
+        console.log('req.body :>> ', req.body);
+
+        const u = await User.findOne({ licenseNo });
+
+        console.log('user :>> ', u);
+        if (u) {
+            console.log('user exist');
+            if (u.name.toLowerCase() != name.toLowerCase()) {
+                return res.json({ err: "Please enter the name as per License" })
+            }
+            if (u.dob !== dob) {
+                return res.json({ err: "incorrect birth date for user : " + u.name })
+            }
+            if (u.email.toLowerCase() !== email.toLowerCase()) {
+                return res.json({ err: "Please enter the registered email" })
+            }
+            else if (u.contact != contact) {
+                return res.json({ err: "Please enter the registered Mobile number" })
+            }
+            else if (u.aadharNo != aadharNo) {
+                return res.json({ err: "Entered Adhaar number is not belongs to " + u.name + "...Please enter correct one" })
+            }
+            else {
+                u.vehicleNo.push(vehicleNo);
+                await u.save();
+            }
+        }
+        else {
+            const user = new User({
+                name, email, contact, aadharNo, address, dob, licenseNo, vehicleNo: [vehicleNo]
+            })
+            console.log('user :>> ', user);
+            await user.save();
+            console.log("registered")
+        }
+        return res.status(200).json({ success: "Vehicle successfully registered.!" })
+    }
+    catch (err) {
+        return res.json({ err: "Unable to register vehicle...try again later" })
     }
 })
 module.exports = router;
