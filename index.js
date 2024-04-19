@@ -15,6 +15,11 @@ exp.use(cors({
 require('./src/db/conn');
 exp.use(require('./src/routes/auth.js'))
 
+app.use((req, res, next) => {
+  res.header({"Access-Control-Allow-Origin": "*"});
+  next();
+}) 
+
 exp.listen(7100, () => {
     console.log("running on port 7100")
 })
