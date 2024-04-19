@@ -5,7 +5,10 @@ exp.use(express.json())
 
 const cookieParser = require('cookie-parser');
 exp.use(cookieParser());
-exp.use(cors());
+exp.use(cors({ origin: true, credentials: true }));
+
+
+
 
 // exp.use((req, res, next) => {
 //   res.header({"Access-Control-Allow-Origin": "*"});
