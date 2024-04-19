@@ -3,7 +3,7 @@ const exp = express()
 const cors = require('cors')
 const cookieParser = require('cookie-parser');
 exp.use(cors({
-    origin: "http://localhost:3000",
+    origin: "https://662238ba251134ae9b8ac870--singular-sprinkles-a2c4bf.netlify.app/",
     credentials: true,
 }));
 exp.use(express.json())
