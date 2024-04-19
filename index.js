@@ -15,7 +15,7 @@ exp.use(cors({
 require('./src/db/conn');
 exp.use(require('./src/routes/auth.js'))
 
-app.use((req, res, next) => {
+exp.use((req, res, next) => {
   res.header({"Access-Control-Allow-Origin": "*"});
   next();
 }) 
