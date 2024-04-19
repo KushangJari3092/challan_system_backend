@@ -9,8 +9,8 @@ exp.use(cors({
 exp.use(express.json())
 exp.use(cookieParser());
 
-require('./db/conn');
-exp.use(require('./routes/auth.js'))
+require('./src/db/conn');
+exp.use(require('./src/routes/auth.js'))
 
 exp.listen(7100, () => {
     console.log("running on port 7100")
