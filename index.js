@@ -3,7 +3,8 @@ const exp = express()
 const cors = require('cors')
 const cookieParser = require('cookie-parser');
 exp.use(cors({
-    origin: "https://662238ba251134ae9b8ac870--singular-sprinkles-a2c4bf.netlify.app/",
+    origin: "https://662238ba251134ae9b8ac870--singular-sprinkles-a2c4bf.netlify.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
 }));
 exp.use(express.json())
